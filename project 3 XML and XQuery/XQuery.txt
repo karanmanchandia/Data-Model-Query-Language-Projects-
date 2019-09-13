@@ -1,0 +1,206 @@
+(: Project3 :)
+(: Submitted By: Karan Manchandia, UBIT:karanman :)
+
+(: The XML file as per the given DTD is shown below :)
+
+<emps>
+  <employee ename="Mark">
+    <department>
+      <name>Sales</name>
+      <salary>8000</salary>
+    </department>
+    <department>
+      <name>IT</name>
+      <salary>5000</salary>
+    </department>
+    <department>
+      <name>HR</name>
+      <salary>7000</salary>
+    </department>
+  </employee>
+  <employee ename="Tom">
+  </employee>
+  <employee ename="Jack">
+    <department>
+      <name>IT</name>
+      <salary>1000</salary>
+    </department>
+  </employee>
+  <employee ename="Harry">
+    <department>
+      <name>Sales</name>
+      <salary>4000</salary>
+    </department>
+  </employee>
+  <employee ename="Sam">
+    <department>
+      <name>HR</name>
+      <salary>4000</salary>
+    </department>
+  </employee>
+</emps>
+
+
+(: 2.1 Find the names of all the employees of the departments Sales or IT and their salaries in those departments.:)
+
+xquery version "3.1" encoding "UTF-8";
+let $emp := doc('/db/emps.xml')
+for $e in $emp/emps/employee/department
+where some $t in $e/name satisfies
+$t='Sales' or $t='IT'
+return <employee ename = "{$e/../@ename}"> 
+<department>
+   {$e/name}
+   {$e/salary}
+    </department>
+</employee>
+
+(: The output of query 2.1 for the given input XML file is shown below :)
+
+<employee ename="Mark">
+    <department>
+        <name>Sales</name>
+        <salary>8000</salary>
+    </department>
+</employee>
+<employee ename="Mark">
+    <department>
+        <name>IT</name>
+        <salary>5000</salary>
+    </department>
+</employee>
+<employee ename="Jack">
+    <department>
+        <name>IT</name>
+        <salary>1000</salary>
+    </department>
+</employee>
+<employee ename="Harry">
+    <department>
+        <name>Sales</name>
+        <salary>4000</salary>
+    </department>
+</employee>
+
+
+(: 2.2 Find the names of the departments that have the average salary greater than 5000.:)
+
+xquery version "3.1" encoding "UTF-8";
+let $dept := distinct-values(
+  let $emp := doc('/db/emps.xml')/emps/employee
+  for $dept in $emp/department
+  where some $t in $dept/salary satisfies avg($dept/salary)>5000
+  return $dept/name
+  )
+return <department>
+       <name>
+           {$dept}
+        </name>
+       </department>
+
+(: The output of query 2.2 for the given input XML file is shown below :)
+
+<department>
+    <name>Sales HR</name>
+</department>
+
+
+(: Question 2.3:)
+
+  xquery version "3.1" encoding "UTF-8";
+  <depts>{
+  let $deptname := distinct-values
+  (let $doc := doc('/db/emps.xml')
+  return data($doc//name))
+  for $deptlist in $deptname
+  return <department dname = "{$deptlist}">
+           {
+               let $newdoc := doc('/db/emps.xml')
+               for $newemp in $newdoc/emps/employee
+                for $newdept in $newemp/department
+                 where $deptlist= data($newdept/name) 
+                 return <employee><ename>{data($newdept/../@ename)}</ename>
+                        {
+                            for $newdept1 in $newemp/department
+                            where $deptlist= data($newdept1/name) 
+                            return <salary>{data($newdept/salary)}</salary>
+                        }
+                 </employee>
+           }
+         </department>
+}
+</depts>
+
+(: The output of query 2.3 for the given input XML file is shown below :)
+
+<depts>
+    <department dname="Sales">
+        <employee>
+            <ename>Mark</ename>
+            <salary>8000</salary>
+        </employee>
+        <employee>
+            <ename>Harry</ename>
+            <salary>4000</salary>
+        </employee>
+    </department>
+    <department dname="IT">
+        <employee>
+            <ename>Mark</ename>
+            <salary>5000</salary>
+        </employee>
+        <employee>
+            <ename>Jack</ename>
+            <salary>1000</salary>
+        </employee>
+    </department>
+    <department dname="HR">
+        <employee>
+            <ename>Mark</ename>
+            <salary>7000</salary>
+        </employee>
+        <employee>
+            <ename>Sam</ename>
+            <salary>4000</salary>
+        </employee>
+    </department>
+</depts>
+
+(: The DTD for the output of query 2.3 is shown below :)
+
+<!DOCTYPE depts[
+  <!ELEMENT depts (department*)>
+  <!ELEMENT department (employee*)>
+  <!ATTLIST department dname CDATA #REQUIRED>
+  <!ELEMENT employee (ename,salary)>
+  <!ELEMENT ename (#PCDATA)>
+  <!ELEMENT salary (#PCDATA)>
+  ]>
+
+(: End of Project :)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
